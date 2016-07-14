@@ -1,0 +1,3 @@
+.docker/config.json
+versions/*/Dockerfile
+versions/*/.build
