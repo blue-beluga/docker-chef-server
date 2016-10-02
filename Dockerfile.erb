@@ -1,13 +1,13 @@
 # encoding: UTF-8
 
-FROM <%= ENV.fetch('FROM') %>:<%= ENV.fetch('TAG') %>
+FROM <%= ENV.fetch('FROM') %>
 MAINTAINER The Blue Beluga <admin@bluebeluga.io>
 
 LABEL vendor="The Blue Beluga Company"
-LABEL io.bluebeluga.alpine.description="Chef Server"
-LABEL io.bluebeluga.alpine.version="<%= ENV.fetch('TAG') %>"
-LABEL io.bluebeluga.alpine.git-revision="<%= ENV.fetch('GIT_REVISION') %>"
-LABEL io.bluebeluga.alpine.release-date="<%= Time.now.strftime('%B %d, %Y %H:%M') %>"
+LABEL io.bluebeluga.chef-server.description="Chef Server"
+LABEL io.bluebeluga.chef-server.version="<%= ENV.fetch('TAG') %>"
+LABEL io.bluebeluga.chef-server.git-revision="<%= ENV.fetch('GIT_REVISION') %>"
+LABEL io.bluebeluga.chef-server.release-date="<%= Time.now.strftime('%B %d, %Y %H:%M') %>"
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends aria2
