@@ -1,12 +1,13 @@
 # encoding: UTF-8
 
-FROM <%= ENV.fetch('FROM') %>
+FROM <%= ENV.fetch('FROM') %>:<%= ENV.fetch('TAG') %>
 MAINTAINER The Blue Beluga <admin@bluebeluga.io>
 
-LABEL name="chef-server"
-LABEL description="Chef Server"
-LABEL version="<%= ENV.fetch('CHEF_SERVER_VERSION') %>"
-LABEL git_revision="<%= ENV.fetch('GIT_REVISION') %>"
+LABEL vendor="The Blue Beluga Company"
+LABEL io.bluebeluga.alpine.description="Chef Server"
+LABEL io.bluebeluga.alpine.version="<%= ENV.fetch('TAG') %>"
+LABEL io.bluebeluga.alpine.git-revision="<%= ENV.fetch('GIT_REVISION') %>"
+LABEL io.bluebeluga.alpine.release-date="<%= Time.now.strftime('%B %d, %Y %H:%M') %>"
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends aria2
@@ -19,12 +20,15 @@ ENV CHEF_CLIENT_SHA256 <%= ENV.fetch 'CHEF_CLIENT_SHA256' %>
 
 COPY files/install.sh /tmp/install.sh
 RUN ["/bin/sh", "/tmp/install.sh"]
+
 COPY files/init.rb /init.rb
 COPY files/chef-server.rb /.chef/chef-server.rb
 COPY files/logrotate /opt/opscode/sv/logrotate
 COPY files/knife.rb /etc/chef/knife.rb
 COPY files/backup.sh /usr/local/bin/chef-server-backup
+
 ENV KNIFE_HOME /etc/chef
+
 RUN apt-get -y autoremove aria2 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

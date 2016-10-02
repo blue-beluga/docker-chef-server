@@ -79,17 +79,14 @@ endif
 
 HELP_FMT := 'make $(YL)%-15s $(NC)\# %s\n'
 
-# list of dependancies in the build context
-DEPS := $(shell find . -type f -print)
-
 # Provide a way to shorten build arguments below.
 IMAGE_NAME = $(REPOSITORY):$(TAG)
 REPO = $(REPOSITORY)
 REG  = $(REGISTRY)
-
-# ******************************************************************************
 #
+# ******************************************************************************
 # Define the actual usable targets.
+#
 help::
 	@printf $(HELP_FMT) 'task' 'Shows the current task info.'
 task::
@@ -103,7 +100,7 @@ task::
 
 help::
 	@printf $(HELP_FMT) 'push' 'Push image or a repository to the registry'
-push:: task build
+push:: task build test
 	for registry in $(PUSH_REGISTRIES); do \
 		for tag in $(PUSH_TAGS); do \
 			docker tag "$(REG)/$(REPO):$(TAG)" "$${registry}/$(REPO):$${tag}"; \
@@ -120,13 +117,13 @@ test:: task build
 
 help::
 	printf $(HELP_FMT) 'build' 'Build an image from a Dockerfile'
-build:: task stop .render .built
-.PHONY:: build .built
+build:: task stop .render .build
+.PHONY:: build .build
 
-.built:: . $(DEPS)
+.build:: . $(DEPS)
 	docker pull $(FROM)
 	docker build -t "$(REG)/$(REPO):$(TAG)" -f "versions/$(TAG)/Dockerfile" .
-	docker inspect -f '{{.Id}}' $(REG)/$(REPO):$(TAG) > "versions/$(TAG)/.built"
+	docker inspect -f '{{.Id}}' $(REG)/$(REPO):$(TAG) > "versions/$(TAG)/.build"
 ifeq "$(TAG)" "$(LATEST_TAG)"
 	docker tag "$(REG)/$(REPO):$(TAG)" "$(REG)/$(REPO):latest"
 endif
@@ -142,14 +139,14 @@ endif
 help::
 	printf $(HELP_FMT) 'clean' 'Stop and remove build artifacts and images'
 clean:: task stop
-	rm -f .render .built Dockerfile
+	rm -f .render .build Dockerfile
 	docker images -qa "$(REPO):$(TAG)" | xargs docker rmi -f
 	docker images -qa "$(REPO):latest" | xargs docker rmi -f
 
 # Per-tag Dockerfile target. Look for Dockerfile or Dockerfile.erb in the root,
 # and use it for $(TAG). We prioritize Dockerfile.erb over Dockerfile if both
 # are present.
-.render: Dockerfile.erb Dockerfile
+.render: $(TAG) Dockerfile.erb Dockerfile
 ifneq (,$(wildcard Dockerfile.erb))
 	erb "Dockerfile.erb" > "versions/$(TAG)/Dockerfile"
 else
@@ -168,6 +165,12 @@ Dockerfile:
 ifneq (,$(wildcard Dockerfile))
 	$(warning You must create a Dockerfile.erb or Dockerfile)
 endif
+
+$(TAG):
+	mkdir -p "versions/$(TAG)"
+
+# list of dependancies in the build context
+DEPS = $(shell find versions/$(TAG) -type f -print)
 
 .PHONY:: push test build stop
 .DEFAULT_GOAL := test

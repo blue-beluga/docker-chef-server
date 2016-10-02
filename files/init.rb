@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-# rubocop:disable GlobalVars, SpecialGlobalVars
-
-# Some reading: http://felipec.wordpress.com/2013/11/04/init/
+# encoding: UTF-8
 
 require 'date'
 require 'fileutils'

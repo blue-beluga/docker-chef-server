@@ -1,3 +1,5 @@
+# encoding: UTF-8
+#
 # THIS FILE WILL BE OVERWRITTEN ON CONTAINER START.  Please create a
 # new file named `chef-server-local.rb` for custom settings.
 
